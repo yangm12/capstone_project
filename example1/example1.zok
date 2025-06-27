@@ -1,0 +1,8 @@
+import "hashes/sha256/sha256Padded" as sha256;
+
+def main(u32[8] input) {
+    u8[10] preimg = [0x66, 0x6c, 0x61, 0x73, 0x6b, 0x33, 0x2e, 0x31, 0x2e, 0x30];
+    u32[8] affected_hash = sha256(preimg);
+    assert(input == affected_hash);
+    return;
+}
