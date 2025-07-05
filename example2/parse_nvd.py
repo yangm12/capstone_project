@@ -2,10 +2,10 @@ import json
 import hashlib
 import csv
 
-# ======== 配置区域 ========
-NVD_JSON_FILE = "nvdcve-1.1-2010.json"  # 输入文件名
-CSV_OUTPUT_FILE = "nvd_2010_vuln_components.csv"  # 输出 CSV 文件名
-SKIPPED_RANGE_FILE = "skipped_version_ranges.csv"  # version range 输出
+# ======== Configuration  ========
+NVD_JSON_FILE = "nvdcve-1.1-2010.json"  # Input file name
+CSV_OUTPUT_FILE = "nvd_2010_vuln_components.csv"  # Output CSV file name
+SKIPPED_RANGE_FILE = "skipped_version_ranges.csv"  # Version range output
 # ==========================
 
 def extract_vulnerable_cpes_from_node(node):
@@ -14,7 +14,7 @@ def extract_vulnerable_cpes_from_node(node):
         for cpe_match in node["cpe_match"]:
             if cpe_match.get("vulnerable", False):
                 entries.append(cpe_match)
-    # 递归子节点
+    # Recursive child node
     for child in node.get("children", []):
         entries.extend(extract_vulnerable_cpes_from_node(child))
     return entries
@@ -25,7 +25,7 @@ def extract_vulnerable_components(nvd_json_path):
         data = json.load(f)
 
     results = []
-    skipped_count = 0  # 新增跳过计数器
+    skipped_count = 0  
     skipped_version_ranges = []
 
     for item in data.get("CVE_Items", []):
@@ -46,7 +46,7 @@ def extract_vulnerable_components(nvd_json_path):
                         "versionStartIncluding" in cpe_match or "versionStartExcluding" in cpe_match or
                         "versionEndExcluding" in cpe_match or "versionEndIncluding" in cpe_match
                     ):
-                        # 构造范围字符串
+                        # Construct range strings
                         start = cpe_match.get("versionStartIncluding") or cpe_match.get("versionStartExcluding")
                         end = cpe_match.get("versionEndExcluding") or cpe_match.get("versionEndIncluding")
     
@@ -82,13 +82,13 @@ def save_to_csv(rows, output_file, header):
         writer.writerows(rows)
 
 if __name__ == "__main__":
-    print(f"📥 READ {NVD_JSON_FILE} ...")
+    print(f"1. READ {NVD_JSON_FILE} ...")
     parsed_rows, skipped, skipped_ranges = extract_vulnerable_components(NVD_JSON_FILE)
-    print(f"✅ GET {len(parsed_rows)} VALID COMPONENTS")
-    print(f"⚠️ SKIPPED {skipped} INVALID COMPONENTS")
+    print(f"2. GET {len(parsed_rows)} VALID COMPONENTS")
+    print(f"3. SKIPPED {skipped} INVALID COMPONENTS")
 
-    print(f"💾 VALID COMPONENTS SAVED TO {CSV_OUTPUT_FILE} ...")
+    print(f"4. VALID COMPONENTS SAVED TO {CSV_OUTPUT_FILE} ...")
     save_to_csv(parsed_rows, CSV_OUTPUT_FILE, ["cve_id", "vendor", "product", "version", "sha256"])
-    print(f"💾 INVALID COMPONENTS SAVED TO {SKIPPED_RANGE_FILE} ...")
+    print(f"5. INVALID COMPONENTS SAVED TO {SKIPPED_RANGE_FILE} ...")
     save_to_csv(skipped_ranges, SKIPPED_RANGE_FILE, ["cve_id", "vendor", "product", "version_range"])
-    print("✅ DONE")
+    print("6. DONE")
